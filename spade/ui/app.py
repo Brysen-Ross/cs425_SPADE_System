@@ -5,6 +5,7 @@ class SPADEApp(tk.Tk):
     def __init__(self, printer):
         super().__init__()
         self.printer = printer
+        self.camera_connected = False #temporary placeholder for camera connection status
         self.title("SPADE Application")
         self.geometry("900x600")
         self.resizable(True,True)
@@ -61,17 +62,17 @@ class SPADEApp(tk.Tk):
         setup_description = tk.Label(self.main_content, text="Connect the printer and camera before monitoring starts.", bg="#FFFFFF", font=("Arial", 14))
         setup_description.pack(anchor="w", padx=16)
 
-        printer_frame = tk.Frame(self.main_content, bg="#FFFFFF", highlightbackground="#D1D5DB", highlightthickness=1)
-        printer_frame.pack(fill="x", padx=16, pady=(20, 0), ipady=12)
+        self.printer_frame = tk.Frame(self.main_content, bg="#FFFFFF", highlightbackground="#D1D5DB", highlightthickness=1)
+        self.printer_frame.pack(fill="x", padx=16, pady=(20, 0), ipady=12)
 
-        connect_printer_title = tk.Label(printer_frame, text="Printer Connection", bg="#FFFFFF", fg="#1D344A", font=("Arial", 12, "bold"))
-        connect_printer_title.grid(row=0, column=0, sticky="w", padx=16, pady=(10, 2))
+        self.connect_printer_title = tk.Label(self.printer_frame, text="Printer Connection", bg="#FFFFFF", fg="#1D344A", font=("Arial", 12, "bold"))
+        self.connect_printer_title.grid(row=0, column=0, sticky="w", padx=16, pady=(10, 2))
 
-        self.printer_status_label = tk.Label(printer_frame, text="Not Connected", bg="#FFFFFF", fg="#B7791F", font=("Arial", 10))
+        self.printer_status_label = tk.Label(self.printer_frame, text="Not Connected", bg="#FFFFFF", fg="#B7791F", font=("Arial", 10))
         self.printer_status_label.grid(row=1, column=0, sticky="w", padx=16)
 
-        connect_printer_button = tk.Button(printer_frame, text="Connect", bg="#0080FE", fg="white", font=("Arial", 10, "bold"), command=self.connect_printer)
-        connect_printer_button.grid(row=1, column=1, rowspan=2, sticky="e", padx=150)
+        self.connect_printer_button = tk.Button(self.printer_frame, text="Connect Printer", bg="#0080FE", fg="white", font=("Arial", 10, "bold"), command=self.connect_printer)
+        self.connect_printer_button.grid(row=1, column=1, rowspan=2, sticky="e", padx=125)
 
         camera_frame = tk.Frame(self.main_content, bg="#FFFFFF", highlightbackground="#D1D5DB", highlightthickness=1)
         camera_frame.pack(fill="x", padx=16, pady=(16, 0), ipady=12)
@@ -82,15 +83,21 @@ class SPADEApp(tk.Tk):
         self.camera_status_label = tk.Label(camera_frame, text="Not Connected", bg="#FFFFFF", fg="#B7791F", font=("Arial", 10))
         self.camera_status_label.grid(row=1, column=0, sticky="w", padx=16)
 
-        connect_camera_button = tk.Button(camera_frame, text="Connect", bg="#0080FE", fg="white", font=("Arial", 10, "bold"))
-        connect_camera_button.grid(row=1, column=1, rowspan=2, sticky="e", padx=150)
+        self.connect_camera_button = tk.Button(camera_frame, text="Connect Camera", bg="#0080FE", fg="white", font=("Arial",10, "bold"))
+        self.connect_camera_button.grid(row=1, column=1, rowspan=2, sticky="e", padx=125)
 
+        self.both_not_connected_frame = tk.Frame(self.main_content, bg="#FFF3D6", highlightbackground="#EBC66F", highlightthickness=1)
+        self.both_not_connected_frame.pack(fill="x", padx=16, pady=(16, 0), ipady=12)
+
+        both_not_connected_title = tk.Label(self.both_not_connected_frame, text="Both devices must be connected before monitoring can start.", bg="#FFF3D6", fg="#92600a", font=("Arial", 10))
+        both_not_connected_title.pack(anchor="w", padx=16, pady=8)
         
-
     def connect_printer(self):
         success = self.printer.connect()
         if success:
-            self.printer_status_label.config(text="Connected", fg="#16803C")
+            self.printer_status_label.config(text="Connected", fg="#16803C", bg="#D0F0C0")
+            self.connect_printer_title.config(bg="#D0F0C0")
+            self.printer_frame.config(bg="#D0F0C0", highlightbackground="#38A169")
         else:
             self.printer_status_label.config(text="Not Connected", fg="#B7791F")
 
@@ -98,9 +105,16 @@ class SPADEApp(tk.Tk):
         status = self.printer.get_status()
         if(hasattr(self, "printer_status_label") and self.printer_status_label.winfo_exists()):
             if status.state == "Offline":
-                self.printer_status_label.config(text="Not Connected", fg="#B7791F")
+                self.printer_status_label.config(text="Not Connected", bg="#FFFFFF", fg="#B7791F")
+                self.connect_printer_title.config(bg="#FFFFFF")
+                self.printer_frame.config(bg="#FFFFFF", highlightbackground="#D1D5DB")
+                self.connect_printer_button.grid()
             else:
-                self.printer_status_label.config(text="Connected", fg="#16803C")
+                self.printer_status_label.config(text="Connected", fg="#16803C", bg="#D0F0C0")
+                self.connect_printer_title.config(bg="#D0F0C0")
+                self.printer_frame.config(bg="#D0F0C0", highlightbackground="#38A169")
+                self.connect_printer_button.grid_remove()
+
         self.after(1000, self.update_printer_status)
 
     def connect_camera(self):

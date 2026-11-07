@@ -15,6 +15,10 @@ class MockPrinter:
     def connect(self):
         self.connected = True
         return True
+    
+    def disconnect(self):
+        self.connected = False
+        return True
 
     def get_status(self):
         return PrinterStatus(

@@ -47,6 +47,7 @@ class SPADEApp(tk.Tk):
 
         self.status_panel = tk.Frame(body, bg="#FAFAFA", width=220)
         self.status_panel.grid(row=0, column=2, sticky="nsew")
+        self.create_status_panel()
 
     def clear_main_content_frame(self):
         for widget in self.main_content.winfo_children():
@@ -111,11 +112,13 @@ class SPADEApp(tk.Tk):
                 self.printer_frame.config(bg="#FFFFFF", highlightbackground="#D1D5DB")
                 self.connect_printer_title.config(bg="#FFFFFF")
                 self.printer_status_label.config(text="Not Connected", bg="#FFFFFF", fg="#B7791F")
+                self.system_printer_status.config(text="● Not Connected", fg="#B7791F")
                 self.connect_printer_button.grid()
             else:
                 self.printer_frame.config(bg="#D0F0C0", highlightbackground="#38A169")
                 self.connect_printer_title.config(bg="#D0F0C0")
                 self.printer_status_label.config(text="Connected", fg="#16803C", bg="#D0F0C0")
+                self.system_printer_status.config(text="● Connected", fg="#16803C")
                 self.connect_printer_button.grid_remove()
         self.update_both_not_connected_frame(status.connected)
         self.after(3000, self.update_printer_status)
@@ -144,3 +147,18 @@ class SPADEApp(tk.Tk):
             if not self.both_not_connected_frame.winfo_manager():
                 self.both_not_connected_frame.pack(fill="x", padx=16, pady=(16, 0), ipady=12)
 
+    def create_status_panel(self):
+        system_status_frame = tk.Frame(self.status_panel, bg="#FFFFFF", highlightbackground="#D1D5DB", highlightthickness=1)
+        system_status_frame.pack(fill="x", padx=8, pady=(12, 8))
+
+        system_status_title = tk.Label(system_status_frame, text="System Status", bg="#FFFFFF", fg="#1D344A", font=("Arial", 12, "bold"))
+        system_status_title.pack(anchor="w", padx=12, pady=(12,8))
+
+        printer_status_row = tk.Frame(system_status_frame, bg="#FFFFFF")
+        printer_status_row.pack(fill="x", padx=12, pady=6)
+
+        printer_name_label = tk.Label(printer_status_row, text="Printer", bg="#FFFFFF", fg="#1D344A", font=("Arial", 10))
+        printer_name_label.pack(side="left")
+
+        self.system_printer_status = tk.Label(printer_status_row, text="● Not Connected", bg="#FFFFFF", fg="#B7791F", font=("Arial", 10))
+        self.system_printer_status.pack(side="right")

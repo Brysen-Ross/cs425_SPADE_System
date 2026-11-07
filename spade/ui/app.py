@@ -1,6 +1,5 @@
 import tkinter as tk
 
-
 class SPADEApp(tk.Tk):
     def __init__(self, printer):
         super().__init__()
@@ -83,39 +82,53 @@ class SPADEApp(tk.Tk):
         self.camera_status_label = tk.Label(camera_frame, text="Not Connected", bg="#FFFFFF", fg="#B7791F", font=("Arial", 10))
         self.camera_status_label.grid(row=1, column=0, sticky="w", padx=16)
 
-        self.connect_camera_button = tk.Button(camera_frame, text="Connect Camera", bg="#0080FE", fg="white", font=("Arial",10, "bold"))
+        self.connect_camera_button = tk.Button(camera_frame, text="Connect Camera", bg="#0080FE", fg="white", font=("Arial",10, "bold"), command=self.connect_camera)
         self.connect_camera_button.grid(row=1, column=1, rowspan=2, sticky="e", padx=125)
 
         self.both_not_connected_frame = tk.Frame(self.main_content, bg="#FFF3D6", highlightbackground="#EBC66F", highlightthickness=1)
         self.both_not_connected_frame.pack(fill="x", padx=16, pady=(16, 0), ipady=12)
 
         both_not_connected_title = tk.Label(self.both_not_connected_frame, text="Both devices must be connected before monitoring can start.", bg="#FFF3D6", fg="#92600a", font=("Arial", 10))
-        both_not_connected_title.pack(anchor="w", padx=16, pady=8)
+        both_not_connected_title.place(relx=0.5, rely=0.5, anchor="center")
         
     def connect_printer(self):
         success = self.printer.connect()
         if success:
-            self.printer_status_label.config(text="Connected", fg="#16803C", bg="#D0F0C0")
-            self.connect_printer_title.config(bg="#D0F0C0")
             self.printer_frame.config(bg="#D0F0C0", highlightbackground="#38A169")
+            self.connect_printer_title.config(bg="#D0F0C0")
+            self.printer_status_label.config(text="Connected", fg="#16803C", bg="#D0F0C0")
+            self.connect_printer_button.grid_remove()
         else:
             self.printer_status_label.config(text="Not Connected", fg="#B7791F")
-
+        self.update_both_not_connected_frame(success)
+        
     def update_printer_status(self):
         status = self.printer.get_status()
         if(hasattr(self, "printer_status_label") and self.printer_status_label.winfo_exists()):
-            if status.state == "Offline":
-                self.printer_status_label.config(text="Not Connected", bg="#FFFFFF", fg="#B7791F")
-                self.connect_printer_title.config(bg="#FFFFFF")
+            if not status.connected:
                 self.printer_frame.config(bg="#FFFFFF", highlightbackground="#D1D5DB")
+                self.connect_printer_title.config(bg="#FFFFFF")
+                self.printer_status_label.config(text="Not Connected", bg="#FFFFFF", fg="#B7791F")
                 self.connect_printer_button.grid()
             else:
-                self.printer_status_label.config(text="Connected", fg="#16803C", bg="#D0F0C0")
-                self.connect_printer_title.config(bg="#D0F0C0")
                 self.printer_frame.config(bg="#D0F0C0", highlightbackground="#38A169")
+                self.connect_printer_title.config(bg="#D0F0C0")
+                self.printer_status_label.config(text="Connected", fg="#16803C", bg="#D0F0C0")
                 self.connect_printer_button.grid_remove()
-
-        self.after(1000, self.update_printer_status)
+        self.update_both_not_connected_frame(status.connected)
+        self.after(3000, self.update_printer_status)
 
     def connect_camera(self):
+        self.camera_connected = True #temporary placeholder for camera connection logic
+
+    def update_camera_status(self):
         pass
+    
+    def update_both_not_connected_frame(self, printer_connected):
+        if not self.both_not_connected_frame.winfo_exists():
+            return
+        if printer_connected and self.camera_connected:
+            self.both_not_connected_frame.pack_forget()
+        else:
+            if not self.both_not_connected_frame.winfo_manager():
+                self.both_not_connected_frame.pack(fill="x", padx=16, pady=(16, 0), ipady=12)

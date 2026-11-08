@@ -1,10 +1,13 @@
 import tkinter as tk
+import cv2
+from PIL import Image, ImageTk
 
 class SPADEApp(tk.Tk):
-    def __init__(self, printer):
+    def __init__(self, printer, camera):
         super().__init__()
         self.printer = printer
-        self.camera_connected = False #temporary placeholder for camera connection status
+        self.camera = camera
+        self.printer_connected = False
         self.title("SPADE Application")
         self.geometry("900x600")
         self.resizable(True,True)
@@ -13,6 +16,8 @@ class SPADEApp(tk.Tk):
         self.create_layout()
         self.show_setup()
         self.after(1000, self.update_printer_status)
+        self.after(1000, self.update_camera_status)
+        self.after(1100, self.update_live_camera_preview)
         
     def create_header(self):
         header = tk.Frame(self, bg="#1D405F", height=60)
@@ -96,6 +101,7 @@ class SPADEApp(tk.Tk):
         
     def connect_printer(self):
         success = self.printer.connect()
+        self.printer_connected = success
         if success:
             self.printer_frame.config(bg="#D0F0C0", highlightbackground="#38A169")
             self.connect_printer_title.config(bg="#D0F0C0")
@@ -107,6 +113,7 @@ class SPADEApp(tk.Tk):
 
     def update_printer_status(self):
         status = self.printer.get_status()
+        self.printer_connected = status.connected
         if(hasattr(self, "printer_status_label") and self.printer_status_label.winfo_exists()):
             if not status.connected:
                 self.printer_frame.config(bg="#FFFFFF", highlightbackground="#D1D5DB")
@@ -124,21 +131,38 @@ class SPADEApp(tk.Tk):
         self.after(3000, self.update_printer_status)
 
     def connect_camera(self):
-        self.camera_connected = True #temporary placeholder for camera connection logic
-        self.camera_frame.config(bg="#D0F0C0", highlightbackground="#38A169")
-        self.connect_camera_title.config(bg="#D0F0C0")
-        self.camera_status_label.config(text="Connected", fg="#16803C", bg="#D0F0C0")
-        self.connect_camera_button.grid_remove()
-        printer_connected = self.printer.get_status().connected
-        self.update_both_not_connected_frame(printer_connected)
+        success = self.camera.connect()
+        if success:
+            self.camera_frame.config(bg="#D0F0C0", highlightbackground="#38A169")
+            self.connect_camera_title.config(bg="#D0F0C0")
+            self.camera_status_label.config(text="Connected", fg="#16803C", bg="#D0F0C0")
+            self.connect_camera_button.grid_remove()
+        else:
+            self.camera_status_label.config(text="Not Connected", fg="#B7791F")
+        self.update_both_not_connected_frame(self.printer_connected)
 
     def update_camera_status(self):
-        pass
+        if not self.camera.connected:
+            self.camera.connect()
+        if(hasattr(self, "camera_status_label") and self.camera_status_label.winfo_exists()):
+            if not self.camera.connected:
+                self.camera_frame.config(bg="#FFFFFF", highlightbackground="#D1D5DB")
+                self.connect_camera_title.config(bg="#FFFFFF")
+                self.camera_status_label.config(text="Not Connected", bg="#FFFFFF", fg="#B7791F")
+                self.connect_camera_button.grid()
+            else:
+                self.camera_frame.config(bg="#D0F0C0", highlightbackground="#38A169")
+                self.connect_camera_title.config(bg="#D0F0C0")
+                self.camera_status_label.config(text="Connected", fg="#16803C", bg="#D0F0C0")
+                self.connect_camera_button.grid_remove()
+
+        self.update_both_not_connected_frame(self.printer_connected)
+        self.after(3000, self.update_camera_status)
     
     def update_both_not_connected_frame(self, printer_connected):
         if not self.both_not_connected_frame.winfo_exists():
             return
-        if printer_connected and self.camera_connected:
+        if printer_connected and self.camera.connected:
             self.both_not_connected_frame.pack_forget()
             if not self.continue_to_monitor_button.winfo_manager():
                 self.continue_to_monitor_button.pack(anchor="e", padx=16, pady=(20, 0))
@@ -162,3 +186,31 @@ class SPADEApp(tk.Tk):
 
         self.system_printer_status = tk.Label(printer_status_row, text="● Not Connected", bg="#FFFFFF", fg="#B7791F", font=("Arial", 10))
         self.system_printer_status.pack(side="right")
+
+        self.preview_livecam_frame = tk.Frame(self.status_panel, bg="#FFFFFF", highlightbackground="#D1D5DB", highlightthickness=1)
+        self.preview_livecam_frame.pack(fill="x", padx=8, pady=(8,12))
+
+        preview_livecam_title = tk.Label(self.preview_livecam_frame, text="Live Camera Preview", bg="#FFFFFF", fg="#1D344A", font=("Arial", 12, "bold"))
+        preview_livecam_title.pack(anchor="w", padx=12, pady=(12,8))
+
+    def update_live_camera_preview(self):
+        if self.camera.connected:
+            frame = self.camera.get_frame()
+            if frame is not None:
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                image = Image.fromarray(frame)
+                image = image.resize((200, 150), Image.Resampling.LANCZOS)
+                photo = ImageTk.PhotoImage(image)
+
+                if hasattr(self, "live_camera_label"):
+                    self.live_camera_label.config(image=photo)
+                    self.live_camera_label.image = photo
+                else:
+                    self.live_camera_label = tk.Label(self.preview_livecam_frame, image=photo, bg="#FFFFFF")
+                    self.live_camera_label.image = photo
+                    self.live_camera_label.pack(padx=12, pady=(0, 12))
+            else:
+                if hasattr(self, "live_camera_label"):
+                    self.live_camera_label.destroy()
+                    del self.live_camera_label
+        self.after(67, self.update_live_camera_preview)

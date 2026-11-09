@@ -1,6 +1,8 @@
 import tkinter as tk
+from pathlib import Path
 from spade.ui.status_panel import StatusPanel
 from spade.ui.setup_view import SetupView
+from spade.ui.recorder import WindowRecorder
 
 class SPADEApp(tk.Tk):
     def __init__(self, printer, camera):
@@ -8,13 +10,17 @@ class SPADEApp(tk.Tk):
         self.printer = printer
         self.camera = camera
         self.printer_connected = False
+        self.recorder = None
+        self.recordings_folder = Path.home() / "Documents" / "SPADE_UI_Recordings"
         self.title("SPADE Application")
-        self.geometry("900x600")
+        self.geometry("1050x600")
         self.resizable(True,True)
         self.configure(bg="#F3F4F6")
         self.create_header()
         self.create_layout()
         self.show_setup()
+        self.protocol("WM_DELETE_WINDOW", self.close_application)
+        self.after(800, self.start_recording)
         self.after(1000, self.update_printer_status)
         self.after(1000, self.update_camera_status)
         self.after(1100, self.update_live_camera_preview)
@@ -30,9 +36,9 @@ class SPADEApp(tk.Tk):
     def create_layout(self):
         body = tk.Frame(self, bg="#FFFFFF")
         body.pack(fill="both", expand=True)
-        body.grid_columnconfigure(0, weight=20, uniform="panels")
-        body.grid_columnconfigure(1, weight=55, uniform="panels")
-        body.grid_columnconfigure(2, weight=25, uniform="panels")
+        body.grid_columnconfigure(0, weight=18, uniform="panels")
+        body.grid_columnconfigure(1, weight=40, uniform="panels")
+        body.grid_columnconfigure(2, weight=42, uniform="panels")
         body.grid_rowconfigure(0, weight=1)
 
         self.sidebar = tk.Frame(body, bg="#F0F2F5", width=160, highlightbackground="#D1D5DB", highlightthickness=1)
@@ -46,6 +52,9 @@ class SPADEApp(tk.Tk):
         self.sidebar_event_history_button.pack(pady=10, padx=10, fill="x")
         self.sidebar_help_button = tk.Button(self.sidebar, text="Help", font=("Arial", 14, "bold")) 
         self.sidebar_help_button.pack(pady=10, padx=10, fill="x")
+
+        self.resume_video_button = tk.Button(self.sidebar, text="Resume Video", font=("Arial", 12, "bold"), bg="#0080FE", fg="white", command=self.camera.resume, state="disabled")
+        self.resume_video_button.pack(pady=20, padx=10, fill="x")
 
         self.main_content = tk.Frame(body, bg="#FFFFFF", highlightbackground="#D1D5DB", highlightthickness=1)
         self.main_content.grid(row=0, column=1, sticky="nsew")
@@ -89,4 +98,45 @@ class SPADEApp(tk.Tk):
             self.status_panel.update_camera_preview(frame)
         else:
             self.status_panel.update_camera_preview(None)
+
+        if self.camera.paused:
+            self.resume_video_button.config(
+                state="normal",
+                text="Resume Video")
+            self.status_panel.system_monitoring_status.config(
+                text="● Failure Detected",
+                fg="#DC2626")
+        else:
+            self.resume_video_button.config(state="disabled")
+            self.status_panel.system_monitoring_status.config(
+                text="● Scanning" if self.camera.connected else "● Not Active",
+                fg="#16803C" if self.camera.connected else "#B7791F")
+
         self.after(67, self.update_live_camera_preview)
+
+    def get_window_region(self):
+        self.update_idletasks()
+        return {"left": self.winfo_rootx(), "top": self.winfo_rooty(), "width": self.winfo_width(), "height": self.winfo_height(),}
+
+    def start_recording(self):
+        try:
+            self.recorder = WindowRecorder(self.recordings_folder, fps=10)
+            self.recorder.start(self.get_window_region())
+            print(f"UI recording started: {self.recorder.output_path}")
+        except Exception as error:
+            print(f"UI recording failed to start: {error}")
+
+    def close_application(self):
+        try:
+            if self.recorder is not None:
+                self.recorder.stop()
+                print(f"UI recording saved: {self.recorder.output_path}")
+        except Exception as error:
+            print(f"Error while stopping recorder: {error}")
+
+        try:
+            self.camera.disconnect()
+        except Exception:
+            pass
+
+        self.destroy()

@@ -26,6 +26,5 @@ class MockPrinter:
             state="Printing" if self.connected else "Offline",
             progress=0.32 if self.connected else 0.0,
             nozzle_temperature=200.0 if self.connected else 0.0,
-            bed_temperature=60.0 if self.connected else 0.0
-        )
+            bed_temperature=60.0 if self.connected else 0.0)
     

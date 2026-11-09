@@ -10,7 +10,8 @@ class SetupView(tk.Frame):
         setup_title = tk.Label(self, text="Setup", bg="#FFFFFF", font=("Arial", 20, "bold"))
         setup_title.pack(anchor="w", padx=16, pady=(16, 4))
 
-        setup_description = tk.Label(self, text="Connect the printer and camera before monitoring starts.", bg="#FFFFFF", font=("Arial", 14))
+        setup_description = tk.Label(self, text="Connect the printer and camera\nbefore monitoring starts.", bg="#FFFFFF", font=("Arial", 14))
+        
         setup_description.pack(anchor="w", padx=16)
 
         self.printer_frame = tk.Frame(self, bg="#FFFFFF", highlightbackground="#D1D5DB", highlightthickness=1)

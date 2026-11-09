@@ -42,8 +42,7 @@ class Moonraker:
                 state=printer_state.capitalize(),
                 progress=progress,
                 nozzle_temperature=nozzle_temp,
-                bed_temperature=bed_temp
-            )
+                bed_temperature=bed_temp)
 
         except (OSError, ValueError, KeyError, TypeError):
             return PrinterStatus(
@@ -51,6 +50,5 @@ class Moonraker:
                 state="Offline",
                 nozzle_temperature=0.0,
                 bed_temperature=0.0,
-                progress=0.0
-            )
+                progress=0.0)
             

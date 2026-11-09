@@ -69,7 +69,7 @@ class StatusPanel(tk.Frame):
             return
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image = Image.fromarray(frame)
-        image = image.resize((200, 150), Image.Resampling.LANCZOS)
+        image = image.resize((400, 300), Image.Resampling.LANCZOS)
         photo = ImageTk.PhotoImage(image)
         self.live_camera_label.config(image=photo)
         self.live_camera_label.image = photo

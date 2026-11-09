@@ -5,16 +5,19 @@
 - PowerShell
 - Git
 - Python 3.12
-- Github repo is cloned locally 
+- Github repo is cloned locally with the `feature/yolo-gui-integration` branch checked out (as of 11/9/26)
   
 **NOTE:** All commands below should be run in Windows PowerShell unless otherwise stated
 
-**NOTE:** If viewing this file in Visual Studio Code, press Ctrl + Shift + V to open the formatted preview 
+**NOTE:** If viewing this file in Visual Studio Code, press `Ctrl + Shift + V` to open the formatted preview 
 
-  1. Install the required dependencies (as of 11/9/26)
+  1. Install the required dependencies and verify (as of 11/9/26)
 
-      a. Run the following in PowerShell: `py -3.12 -m pip install ultralytics torch opencv-python pillow numpy mss requests PyYAML`
+      a. Run the following in PowerShell to install all: `py -3.12 -m pip install ultralytics torch opencv-python pillow numpy mss requests PyYAML`
 
+      b. Run the following in PowerShell to verify installations: `py -3.12 -c "import torch, ultralytics, cv2, PIL, numpy, mss, requests, yaml; print('All dependencies installed successfully!')"`. If all are installed the terminal will show "All dependencies installed successfully!"
+
+      
   2. Install Cloudflare Client and Verify
 
       a. To Install run the following in PowerShell: `winget install --id Cloudflare.cloudflared -e`
@@ -41,7 +44,7 @@
 
       b. Open the SSH config file: `notepad "$HOME\.ssh\config"`
 
-      c. If prompted to create a new file, select "Yes". Make sure the file is named "config" and not "config.txt"
+      c. If prompted to create a new file, select "Yes". The file will probably be renamed from "config" to "config.txt" we will fix that in step 5
 
   5. Add the following in the SSH configuration file and replace [INSERT USERNAME] with the username obtained in step 3, then save and close the file 
 
@@ -53,6 +56,14 @@
           IdentityFile ~/.cloudflared/voron0.compute.magishira.dev-cf_key
           CertificateFile ~/.cloudflared/voron0.compute.magishira.dev-cf_key-cert.pub
       ```
+
+        **NOTE:** If in step 4 the file was renamed to "config.txt" run the following steps
+
+        1. Rename it to just "config" by running the following in PowerShell: `Rename-Item "$HOME\.ssh\config.txt" "config"`
+
+        2. Verify that it worked by running the following in PoweShell: `Get-ChildItem "$HOME\.ssh"`
+
+        3. Output should show just "config" under the "Name" column. If so then move to step 6
 
   6. Generate Cloudflare SSH Credentials
 
@@ -66,7 +77,9 @@
 
       a. Run the following in Powershell: `ssh voron0`
 
-      b. If prompted, follow the provided URL and authenticate through Cloudflare Acess
+      b. If prompted, follow the provided URL and authenticate through Cloudflare Access
+
+      c. If prompted "Are you sure you want to continue connecting (yes/no/[fingerprint])?", enter: `yes`
 
       c. A successful connection should open the Raspberry Pi's terminal
 

@@ -3,8 +3,10 @@ import cv2
 from PIL import Image, ImageTk
 
 class StatusPanel(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, on_live_camera, on_recorded_video):
         super().__init__(parent, bg="#FAFAFA", width=220)
+        self.on_live_camera = on_live_camera
+        self.on_recorded_video = on_recorded_video
         self.create_widgets()
 
     def create_widgets(self):
@@ -44,8 +46,17 @@ class StatusPanel(tk.Frame):
         self.preview_livecam_frame = tk.Frame(self, bg="#FFFFFF", highlightbackground="#D1D5DB", highlightthickness=1)
         self.preview_livecam_frame.pack(fill="x", padx=8, pady=(8, 12))
 
-        preview_livecam_title = tk.Label(self.preview_livecam_frame, text="Live Camera Preview", bg="#FFFFFF", fg="#1D344A", font=("Arial", 12, "bold"))
-        preview_livecam_title.pack(anchor="w", padx=12, pady=(12, 8))
+        self.preview_livecam_header = tk.Frame(self.preview_livecam_frame, bg="#FFFFFF")
+        self.preview_livecam_header.pack(fill="x", padx=12, pady=(12, 8))
+
+        preview_livecam_title = tk.Label(self.preview_livecam_header, text="Live Camera Preview", bg="#FFFFFF", fg="#1D344A", font=("Arial", 12, "bold"))
+        preview_livecam_title.pack(side="left")
+
+        recorded_video_button = tk.Button(self.preview_livecam_header, text="Recorded Video", font=("Arial", 10, "bold"), bg="#0080FE", fg="white", command=self.on_recorded_video)
+        recorded_video_button.pack(side="right", padx=(6, 0))
+
+        live_camera_button = tk.Button(self.preview_livecam_header, text="Live Camera", font=("Arial", 10, "bold"), bg="#0080FE", fg="white", command=self.on_live_camera)
+        live_camera_button.pack(side="right", padx=(12, 0))
 
         self.live_camera_label = tk.Label(self.preview_livecam_frame, bg="#FFFFFF")
         self.live_camera_label.pack(padx=12, pady=(0, 12))

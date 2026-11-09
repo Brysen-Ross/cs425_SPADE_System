@@ -5,10 +5,12 @@ from spade.ui.setup_view import SetupView
 from spade.ui.recorder import WindowRecorder
 
 class SPADEApp(tk.Tk):
-    def __init__(self, printer, camera):
+    def __init__(self, printer, model_camera, live_camera):
         super().__init__()
         self.printer = printer
-        self.camera = camera
+        self.model_camera = model_camera
+        self.live_camera = live_camera
+        self.camera = self.live_camera
         self.printer_connected = False
         self.recorder = None
         self.recordings_folder = Path.home() / "Documents" / "SPADE_UI_Recordings"
@@ -59,7 +61,7 @@ class SPADEApp(tk.Tk):
         self.main_content = tk.Frame(body, bg="#FFFFFF", highlightbackground="#D1D5DB", highlightthickness=1)
         self.main_content.grid(row=0, column=1, sticky="nsew")
 
-        self.status_panel = StatusPanel(body)
+        self.status_panel = StatusPanel(body, on_live_camera=self.switch_to_live_camera, on_recorded_video=self.switch_to_recorded_video)
         self.status_panel.grid(row=0, column=2, sticky="nsew")
 
     def clear_main_content_frame(self):
@@ -140,3 +142,15 @@ class SPADEApp(tk.Tk):
             pass
 
         self.destroy()
+
+    def switch_to_recorded_video(self):
+        self.camera = self.model_camera
+        self.camera.connect()
+        self.resume_video_button.config(command=self.camera.resume)
+        self.status_panel.update_camera_preview(None)
+
+    def switch_to_live_camera(self):
+        self.camera = self.live_camera
+        self.camera.connect()
+        self.resume_video_button.config(command=self.camera.resume)
+        self.status_panel.update_camera_preview(None)

@@ -74,6 +74,15 @@
 
       **NOTE:** The Raspberry Pi must be powered on and connected to the network.
 
+      **Troubleshooting: SSH Permission Denied (publickey)**
+        If SSH returns "Permission denied (publickey)", the Cloudflare authentication session or SSH certificate may have expired.
+
+        1. Refresh Cloudflare authentication by running the following in PowerShell: `cloudflared access login https://voron0.compute.magishira.dev` and authenticate through the browser if prompted
+
+        2. Regenerate the SSH certificate by running the following in PowerShell: `cloudflared access ssh-gen --hostname voron0.compute.magishira.dev`
+
+        3. Return to step 7a
+
 # Connecting to Moonraker and Camera
 
 ## Requirements:

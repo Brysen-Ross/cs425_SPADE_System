@@ -77,21 +77,23 @@ class SPADEApp(tk.Tk):
         self.setup_view.update_connection_warning(self.printer_connected, self.camera.connected)
 
     def update_printer_status(self):
-        status = self.printer.get_status()
-        self.printer_connected = status.connected
-        self.status_panel.update_printer_status(status.connected)
+        if self.camera is self.live_camera:
+            status = self.printer.get_status()
+            self.printer_connected = status.connected
+            self.status_panel.update_printer_status(self.printer_connected)
         if hasattr(self, "setup_view") and self.setup_view.winfo_exists():
-            self.setup_view.update_printer_status(status.connected)
-            self.setup_view.update_connection_warning(self.printer_connected, self.camera.connected)
+            self.setup_view.update_printer_status(self.printer_connected)
+            self.setup_view.update_connection_warning(self.printer_connected, self.live_camera.connected)
         self.after(3000, self.update_printer_status)
 
     def update_camera_status(self):
-        if not self.camera.connected:
-            self.camera.connect()
-        self.status_panel.update_camera_status(self.camera.connected)
+        if self.camera is self.live_camera:
+            if not self.live_camera.connected:
+                self.live_camera.connect()
+        self.status_panel.update_camera_status(self.live_camera.connected)
         if hasattr(self, "setup_view") and self.setup_view.winfo_exists():
-            self.setup_view.update_camera_status(self.camera.connected)
-            self.setup_view.update_connection_warning(self.printer_connected, self.camera.connected)
+            self.setup_view.update_camera_status(self.live_camera.connected)
+            self.setup_view.update_connection_warning(self.printer_connected, self.live_camera.connected)
         self.after(3000, self.update_camera_status)
     
     def update_live_camera_preview(self):
@@ -110,9 +112,14 @@ class SPADEApp(tk.Tk):
                 fg="#DC2626")
         else:
             self.resume_video_button.config(state="disabled")
-            self.status_panel.system_monitoring_status.config(
-                text="● Scanning" if self.camera.connected else "● Not Active",
-                fg="#16803C" if self.camera.connected else "#B7791F")
+            if self.printer_connected and self.camera.connected:
+                self.status_panel.system_monitoring_status.config(
+                    text="● Active",
+                    fg="#16803C")
+            else:
+                self.status_panel.system_monitoring_status.config(
+                    text="● Not Active",
+                    fg="#B7791F")
 
         self.after(67, self.update_live_camera_preview)
 
@@ -148,9 +155,15 @@ class SPADEApp(tk.Tk):
         self.camera.connect()
         self.resume_video_button.config(command=self.camera.resume)
         self.status_panel.update_camera_preview(None)
+        self.status_panel.recorded_video_button.config(bg="white", fg="black")
+        self.status_panel.live_camera_button.config(bg="#0080FE")
+        self.status_panel.preview_livecam_title.config(text="Recorded Video")
 
     def switch_to_live_camera(self):
         self.camera = self.live_camera
         self.camera.connect()
         self.resume_video_button.config(command=self.camera.resume)
         self.status_panel.update_camera_preview(None)
+        self.status_panel.recorded_video_button.config(bg="#0080FE")
+        self.status_panel.live_camera_button.config(bg="white",fg="black")
+        self.status_panel.preview_livecam_title.config(text="Live Camera Feed")

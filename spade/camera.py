@@ -72,7 +72,7 @@ class Camera:
                 return frame
 
         except (OSError, ValueError, cv2.error) as error:
-            print("Camera error:", error)
+            #print("Camera error:", error)
             self.connected = False
             return None
 

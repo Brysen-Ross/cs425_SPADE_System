@@ -4,8 +4,8 @@
 - Windows
 - PowerShell
 - Git
-- Python 3.12
-- Github repo is cloned locally with the `feature/yolo-gui-integration` branch checked out (as of 11/9/26)
+- Python 3.11 or 3.12
+- The SPADE integration project folder is available locally.
   
 **NOTE:** All commands below should be run in Windows PowerShell unless otherwise stated
 
@@ -13,9 +13,9 @@
 
   1. Install the required dependencies and verify (as of 11/9/26)
 
-      a. Run the following in PowerShell to install all: `py -3.12 -m pip install ultralytics torch opencv-python pillow numpy mss requests PyYAML`
+      a. Follow the [Quick start](../README.md). Use the root `pyproject.toml` and `uv.lock` for the app environment.
 
-      b. Run the following in PowerShell to verify installations: `py -3.12 -c "import torch, ultralytics, cv2, PIL, numpy, mss, requests, yaml; print('All dependencies installed successfully!')"`. If all are installed the terminal will show "All dependencies installed successfully!"
+      b. Run `uv run --locked --extra cuda spade --help`. Use `--extra cpu` for the CPU fallback.
 
       
   2. Install Cloudflare Client and Verify
@@ -129,12 +129,12 @@
 
 - First-Time Setup has been completed.
 - SPADE GitHub repository has been cloned locally.
-- Python 3.12 and required dependencies are installed.
+- Python 3.11 or 3.12 and required dependencies are installed.
 - SSH tunnel is active
 
 1. Open Powershell and navigate to the SPADE repository directory
 
-2. Run the following in PowerShell: `py -3.12 -m spade.main`
+2. Run `uv run --locked --extra cuda spade --device cuda`. For CPU, use `--extra cpu` and `--device cpu`.
 
     **NOTE:** This should open the tkinter GUI and run all implemented functions
 
@@ -144,8 +144,8 @@
 
 - First-Time Setup has been completed.
 - SPADE GitHub repository has been cloned locally.
-- Python 3.12 and required dependencies are installed.
+- Python 3.11 or 3.12 and required dependencies are installed.
 
 1. Open PowerShell and navigate to the SPADE repository directory
 
-2. Run the following command in PowerShell to run all unit tests: `py -3.12 -m unittest discover -s tests -v`
+2. Run `uv run --locked --extra cuda python -m unittest discover -s tests -v`. Use `--extra cpu` for the CPU fallback.

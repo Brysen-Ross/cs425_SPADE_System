@@ -11,10 +11,11 @@ from .models import AnalysisError, Detection
 
 
 class YoloDetector:
-    def __init__(self, model_path: Path, confidence: float, image_size: int):
+    def __init__(self, model_path: Path, confidence: float, image_size: int, device="cpu"):
         self._model = YOLO(str(model_path))
         self._confidence = confidence
         self._image_size = image_size
+        self._device = device
 
     def detect(self, frame: Frame) -> tuple:
         try:
@@ -23,6 +24,7 @@ class YoloDetector:
                 imgsz=self._image_size,
                 conf=self._confidence,
                 verbose=False,
+                device=self._device,
             )[0]
             boxes = result.boxes
             if boxes is None:

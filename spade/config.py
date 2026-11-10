@@ -6,13 +6,15 @@ import tomllib
 
 DEFAULT_CONFIG = Path(__file__).resolve().parent.parent / "spade.toml"
 CONFIG_KEYS = (
-    "printer_url", "camera_url", "video_path", "model_path", "confidence", "image_size",
+    "model", "device", "printer_url", "camera_url", "video_path", "model_path", "confidence", "image_size",
 )
 PATH_KEYS = ("video_path", "model_path")
 
 
 @dataclass(frozen=True)
 class Settings:
+    model: str
+    device: str
     printer_url: str
     camera_url: str
     video_path: Path
@@ -34,17 +36,23 @@ def _read_config(path: Path) -> dict:
 def parse_settings(argv=None) -> Settings:
     parser = argparse.ArgumentParser(description="Run the SPADE demo", allow_abbrev=False)
     parser.add_argument("--config", type=Path, help="TOML file overriding the bundled spade.toml")
+    parser.add_argument("--model", choices=("yolo", "rfdetr"), help="Detector implementation")
+    parser.add_argument("--device", choices=("auto", "cpu", "cuda"), help="Inference device")
     parser.add_argument("--printer-url", help="Moonraker base URL")
     parser.add_argument("--camera-url", help="Live camera snapshot URL")
     parser.add_argument("--video", dest="video_path", type=Path, help="Recorded video file")
-    parser.add_argument("--weights", dest="model_path", type=Path, help="YOLO checkpoint file")
-    parser.add_argument("--confidence", type=float, help="YOLO detection threshold (0 to 1)")
-    parser.add_argument("--image-size", type=int, help="YOLO inference image size")
+    parser.add_argument("--weights", dest="model_path", type=Path, help="Selected model's checkpoint")
+    parser.add_argument("--confidence", type=float, help="Detection threshold")
+    parser.add_argument("--image-size", type=int, help="YOLO image size; RF-DETR restores its trained size")
     args = parser.parse_args(argv)
 
     values = _read_config(DEFAULT_CONFIG)
     if args.config is not None:
         values.update(_read_config(args.config.expanduser().resolve()))
+    if args.model is not None:
+        values["model"] = args.model
+    if args.device is not None:
+        values["device"] = args.device
     if args.printer_url is not None:
         values["printer_url"] = args.printer_url
     if args.camera_url is not None:
@@ -62,6 +70,8 @@ def parse_settings(argv=None) -> Settings:
         if key not in values:
             raise ValueError(f"Missing setting: {key}")
     return Settings(
+        model=values["model"],
+        device=values["device"],
         printer_url=values["printer_url"],
         camera_url=values["camera_url"],
         video_path=values["video_path"],

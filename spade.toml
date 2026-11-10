@@ -1,0 +1,6 @@
+printer_url = "http://localhost:7125"
+camera_url = "http://127.0.0.1:8081/snapshot"
+video_path = "scripts/spaghetti_failure.mp4"
+model_path = "scripts/Weights/SPADE_Spaghetti_Only-2/weights/best.pt"
+confidence = 0.75
+image_size = 512

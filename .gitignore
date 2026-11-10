@@ -5,3 +5,4 @@ __pycache__/
 /spade.local.toml
 .vscode/
 SPADE_UI_Recordings/
+/checkpoints/

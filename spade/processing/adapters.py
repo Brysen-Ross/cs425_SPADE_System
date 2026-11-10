@@ -7,10 +7,11 @@ from ultralytics import YOLO
 
 from spade.acquisition.api import Frame
 
+from .api import Detector
 from .models import AnalysisError, Detection
 
 
-class YoloDetector:
+class YoloDetector(Detector):
     def __init__(self, model_path: Path, confidence: float, image_size: int, device="cpu"):
         self._model = YOLO(str(model_path))
         self._confidence = confidence
@@ -44,7 +45,7 @@ class YoloDetector:
             raise AnalysisError("Local YOLO inference failed") from error
 
 
-class RFDETRDetector:
+class RFDETRDetector(Detector):
     def __init__(self, model_path: Path, confidence: float, device: str):
         self._model = RFDETR.from_checkpoint(
             str(model_path), device=device, trust_checkpoint=True

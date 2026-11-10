@@ -1,12 +1,13 @@
+from abc import ABC, abstractmethod
 from time import perf_counter
-from typing import Protocol
 
 from spade.acquisition.api import Frame
 
 from .models import AnalysisError, AnalysisResult, Detection
 
 
-class Detector(Protocol):
+class Detector(ABC):
+    @abstractmethod
     def detect(self, frame: Frame) -> tuple:
         pass
 

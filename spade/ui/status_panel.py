@@ -1,6 +1,7 @@
 import tkinter as tk
 import cv2
 from PIL import Image, ImageTk
+from spade.monitoring.api import Preview
 
 class StatusPanel(tk.Frame):
     def __init__(self, parent, on_live_camera, on_recorded_video):
@@ -73,11 +74,22 @@ class StatusPanel(tk.Frame):
         else:
             self.system_camera_status.config(text="● Not Connected", fg="#B7791F")
 
-    def update_camera_preview(self, frame):
-        if frame is None:
+    def update_camera_preview(self, preview: Preview):
+        if preview.frame is None:
             self.live_camera_label.config(image="")
             self.live_camera_label.image = None
             return
+        frame = preview.frame.image.copy()
+        if preview.analysis is not None:
+            for detection in preview.analysis.detections:
+                x1, y1, x2, y2 = map(round, detection.xyxy)
+                color = (30, 80, 230)
+                label = f"{detection.label} {detection.confidence:.0%}"
+                position = (x1, max(14, y1 - 5))
+                cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+                cv2.putText(
+                    frame, label, position, cv2.FONT_HERSHEY_SIMPLEX, 0.55, color, 2,
+                )
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image = Image.fromarray(frame)
         image = image.resize((400, 300), Image.Resampling.LANCZOS)

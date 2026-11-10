@@ -24,8 +24,7 @@ class HttpSnapshotSource:
             image = cv2.imdecode(data, cv2.IMREAD_COLOR)
             self.connected = image is not None
             return Frame(image) if image is not None else None
-        except (OSError, ValueError, cv2.error) as error:
-            print("Camera error:", error)
+        except (OSError, ValueError, cv2.error):
             self.connected = False
             return None
 

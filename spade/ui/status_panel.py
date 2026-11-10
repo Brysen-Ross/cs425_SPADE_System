@@ -50,14 +50,14 @@ class StatusPanel(tk.Frame):
         self.preview_livecam_header = tk.Frame(self.preview_livecam_frame, bg="#FFFFFF")
         self.preview_livecam_header.pack(fill="x", padx=12, pady=(12, 8))
 
-        preview_livecam_title = tk.Label(self.preview_livecam_header, text="Live Camera Preview", bg="#FFFFFF", fg="#1D344A", font=("Arial", 12, "bold"))
-        preview_livecam_title.pack(side="left")
+        self.preview_livecam_title = tk.Label(self.preview_livecam_header, text="Live Camera Feed", bg="#FFFFFF", fg="#1D344A", font=("Arial", 12, "bold"))
+        self.preview_livecam_title.pack(side="left")
 
-        recorded_video_button = tk.Button(self.preview_livecam_header, text="Recorded Video", font=("Arial", 10, "bold"), bg="#0080FE", fg="white", command=self.on_recorded_video)
-        recorded_video_button.pack(side="right", padx=(6, 0))
+        self.recorded_video_button = tk.Button(self.preview_livecam_header, text="Recorded Video", font=("Arial", 10, "bold"), bg="#0080FE", fg="white", command=self.on_recorded_video)
+        self.recorded_video_button.pack(side="right", padx=(6, 0))
 
-        live_camera_button = tk.Button(self.preview_livecam_header, text="Live Camera", font=("Arial", 10, "bold"), bg="#0080FE", fg="white", command=self.on_live_camera)
-        live_camera_button.pack(side="right", padx=(12, 0))
+        self.live_camera_button = tk.Button(self.preview_livecam_header, text="Live Camera", font=("Arial", 10, "bold"), bg="white", fg="black", command=self.on_live_camera)
+        self.live_camera_button.pack(side="right", padx=(12, 0))
 
         self.live_camera_label = tk.Label(self.preview_livecam_frame, bg="#FFFFFF")
         self.live_camera_label.pack(padx=12, pady=(0, 12))

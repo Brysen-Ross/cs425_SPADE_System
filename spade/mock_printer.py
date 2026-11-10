@@ -1,3 +1,4 @@
+# Mock printer implementation for testing purposes. Does not connect to Moonraker or any real printer
 from dataclasses import dataclass
 
 @dataclass

@@ -137,3 +137,15 @@
 2. Run the following in PowerShell: `py -3.12 -m spade.main`
 
     **NOTE:** This should open the tkinter GUI and run all implemented functions
+
+# Running Unit Tests
+
+## Requirements:
+
+- First-Time Setup has been completed.
+- SPADE GitHub repository has been cloned locally.
+- Python 3.12 and required dependencies are installed.
+
+1. Open PowerShell and navigate to the SPADE repository directory
+
+2. Run the following command in PowerShell to run all unit tests: `py -3.12 -m unittest discover -s tests -v`

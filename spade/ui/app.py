@@ -11,6 +11,7 @@ class SPADEApp(tk.Tk):
         self.printer = printer
         self.monitor = monitor
         self.printer_connected = False
+        self.camera_connected = False
         self.recorder = None
         self.recordings_folder = Path.home() / "Documents" / "SPADE_UI_Recordings"
         self.title("SPADE Application")
@@ -72,25 +73,28 @@ class SPADEApp(tk.Tk):
         self.setup_view = SetupView(self.main_content)
         self.setup_view.pack(fill="both", expand=True)
         self.setup_view.update_printer_status(self.printer_connected)
-        self.setup_view.update_camera_status(self.monitor.connected)
-        self.setup_view.update_connection_warning(self.printer_connected, self.monitor.connected)
+        self.setup_view.update_camera_status(self.camera_connected)
+        self.setup_view.update_connection_warning(self.printer_connected, self.camera_connected)
 
     def update_printer_status(self):
-        status = self.printer.get_status()
-        self.printer_connected = status.connected
-        self.status_panel.update_printer_status(status.connected)
+        if not self.monitor.analysis_enabled:
+            status = self.printer.get_status()
+            self.printer_connected = status.connected
+            self.status_panel.update_printer_status(self.printer_connected)
         if hasattr(self, "setup_view") and self.setup_view.winfo_exists():
-            self.setup_view.update_printer_status(status.connected)
-            self.setup_view.update_connection_warning(self.printer_connected, self.monitor.connected)
+            self.setup_view.update_printer_status(self.printer_connected)
+            self.setup_view.update_connection_warning(self.printer_connected, self.camera_connected)
         self.after(3000, self.update_printer_status)
 
     def update_camera_status(self):
-        if not self.monitor.connected:
-            self.monitor.connect()
-        self.status_panel.update_camera_status(self.monitor.connected)
+        if not self.monitor.analysis_enabled:
+            if not self.monitor.connected:
+                self.monitor.connect()
+            self.camera_connected = self.monitor.connected
+        self.status_panel.update_camera_status(self.camera_connected)
         if hasattr(self, "setup_view") and self.setup_view.winfo_exists():
-            self.setup_view.update_camera_status(self.monitor.connected)
-            self.setup_view.update_connection_warning(self.printer_connected, self.monitor.connected)
+            self.setup_view.update_camera_status(self.camera_connected)
+            self.setup_view.update_connection_warning(self.printer_connected, self.camera_connected)
         self.after(3000, self.update_camera_status)
     
     def update_live_camera_preview(self):
@@ -113,10 +117,10 @@ class SPADEApp(tk.Tk):
                 text="● Analysis Unavailable", fg="#B7791F")
         else:
             self.resume_video_button.config(state="disabled")
-            scanning = self.monitor.connected and self.monitor.analysis_enabled
+            active = self.printer_connected and self.monitor.connected
             self.status_panel.system_monitoring_status.config(
-                text="● Scanning" if scanning else "● Not Active",
-                fg="#16803C" if scanning else "#B7791F")
+                text="● Active" if active else "● Not Active",
+                fg="#16803C" if active else "#B7791F")
 
         self.after(67, self.update_live_camera_preview)
 
@@ -150,7 +154,13 @@ class SPADEApp(tk.Tk):
     def switch_to_recorded_video(self):
         self.monitor.select_recorded_video()
         self.status_panel.update_camera_preview(Preview())
+        self.status_panel.recorded_video_button.config(bg="white", fg="black")
+        self.status_panel.live_camera_button.config(bg="#0080FE")
+        self.status_panel.preview_livecam_title.config(text="Recorded Video")
 
     def switch_to_live_camera(self):
         self.monitor.select_live_camera()
         self.status_panel.update_camera_preview(Preview())
+        self.status_panel.recorded_video_button.config(bg="#0080FE")
+        self.status_panel.live_camera_button.config(bg="white", fg="black")
+        self.status_panel.preview_livecam_title.config(text="Live Camera Feed")

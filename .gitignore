@@ -3,5 +3,5 @@ __pycache__/
 .venv/
 .env
 /spade.local.toml
+.vscode/
 SPADE_UI_Recordings/
-

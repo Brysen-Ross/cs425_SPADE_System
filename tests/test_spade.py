@@ -6,6 +6,8 @@ from spade.camera import Camera
 from spade.ui.status_panel import StatusPanel
 from spade.ui.setup_view import SetupView
 from spade.ui.app import SPADEApp
+from spade.ui.recorder import WindowRecorder
+from spade.mock_printer import MockPrinter
 
 class TestMoonraker(unittest.TestCase):
 
@@ -25,7 +27,6 @@ class TestCamera(unittest.TestCase):
         camera.frame = "Test Frame"
         result = camera.get_frame()
         self.assertEqual(result, "Test Frame")
-
 
 class TestStatusPanel(unittest.TestCase):
 
@@ -62,4 +63,17 @@ class TestSPADEApp(unittest.TestCase):
         finally:
             app.destroy()
 
-    
+class TestWindowRecorder(unittest.TestCase):
+
+    # Tests that the WindowRecorder class can be initialized with a specific fps value.
+    def test_window_recorder_initialization(self):
+        recorder = WindowRecorder("test_output", fps=10)
+        self.assertEqual(recorder.fps, 10)
+
+class TestMockPrinter(unittest.TestCase):
+
+    # Tests that the MockPrinter class can be initialized and the connect method works as expected.
+    def test_mock_printer_is_connected(self):
+        mock_printer = MockPrinter()
+        mock_printer.connect()
+        self.assertTrue(mock_printer.connected)

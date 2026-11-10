@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "spade"
+version = "0.1.0"
+description = "3D printing failure detection with YOLO and RF-DETR"
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "mss==10.2.0",
+    "numpy>=1.26,<3",
+    "opencv-python>=4.8,<6",
+    "pillow>=10",
+    "ultralytics==8.4.208",
+    "rfdetr==1.12.0",
+    "torch==2.9.1",
+    "torchvision==0.24.1",
+]
+
+[project.optional-dependencies]
+cpu = [
+    "torch==2.9.1+cpu; sys_platform != 'darwin'",
+    "torchvision==0.24.1+cpu; sys_platform != 'darwin'",
+]
+cuda = [
+    "torch==2.9.1+cu130; sys_platform != 'darwin'",
+    "torchvision==0.24.1+cu130; sys_platform != 'darwin'",
+]
+
+[project.scripts]
+spade = "spade.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["spade"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"spade.toml" = "spade.toml"
+
+[tool.uv]
+conflicts = [[{extra = "cpu"}, {extra = "cuda"}]]
+
+[tool.uv.sources]
+torch = [
+    {index = "pypi", marker = "sys_platform == 'darwin'"},
+    {index = "pytorch-cpu", extra = "cpu", marker = "sys_platform != 'darwin'"},
+    {index = "pytorch-cu130", extra = "cuda", marker = "sys_platform != 'darwin'"},
+]
+torchvision = [
+    {index = "pypi", marker = "sys_platform == 'darwin'"},
+    {index = "pytorch-cpu", extra = "cpu", marker = "sys_platform != 'darwin'"},
+    {index = "pytorch-cu130", extra = "cuda", marker = "sys_platform != 'darwin'"},
+]
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
